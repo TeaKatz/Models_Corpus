@@ -3,7 +3,7 @@ from tensorflow.keras.layers import Conv2D, MaxPool2D, AvgPool2D
 from ResLayers import IdentityBlock, ProjectionBlock
 
 
-class ResNet18(Model):
+class ResNet34(Model):
     def __init__(self):
         super().__init__()
         self.conv2 = Conv2D(64, 7, strides=2, padding="same")
