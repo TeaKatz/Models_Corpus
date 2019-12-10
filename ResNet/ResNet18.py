@@ -46,9 +46,10 @@ if __name__ == "__main__":
     import numpy as np
 
     resnet = ResNet18()
+    resnet.build(input_shape=(1, 112, 112, 3))
+    resnet.summary()
 
     input_tensor = np.random.rand(10, 112, 112, 3)
     print("input tensor shape: {}".format(input_tensor.shape))
     output_tensor = resnet(input_tensor)
     print("output tensor shape: {}".format(output_tensor.shape))
-    resnet.summary()
