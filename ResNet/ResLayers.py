@@ -5,21 +5,27 @@ from tensorflow.keras.layers import BatchNormalization, Conv2D, Layer
 class IdentityBlock(Layer):
     def __init__(self, filters, kernel_size, depth=2):
         super().__init__()
+        if isinstance(filters, list):
+            assert len(filters) == depth, "Length if filter exceed the layer depth."
+        if isinstance(kernel_size, list):
+            assert len(kernel_size) == depth, "Length if kernel_size exceed the layer depth."
+
         self.depth = depth
-        self.conv2s = [Conv2D(filters, kernel_size, padding="same") for _ in range(depth - 1)]
-        self.bns = [BatchNormalization() for _ in range(depth - 1)]
-        self.conv2_last = Conv2D(filters, kernel_size, padding="same")
-        self.bn_last = BatchNormalization()
+        self.filters = filters if isinstance(filters, list) else [filters for _ in range(depth)]
+        self.kernel_size = kernel_size if isinstance(kernel_size, list) else [kernel_size for _ in range(depth)]
+
+        self.conv2s = [Conv2D(self.filters[i], self.kernel_size[i], padding="same") for i in range(depth)]
+        self.bns = [BatchNormalization() for _ in range(depth)]
 
     def call(self, input_tensor, training=False):
         x = input_tensor
-        for i in range(self.depth - 1):
+        for i in range(len(self.conv2s) - 1):
             x = self.conv2s[i](x)
             x = self.bns[i](x, training=training)
             x = tf.nn.relu(x)
 
-        x = self.conv2_last(x)
-        x = self.bn_last(x, training=training)
+        x = self.conv2s[-1](x)
+        x = self.bns[-1](x, training=training)
 
         x += input_tensor
         x = tf.nn.relu(x)
@@ -28,30 +34,38 @@ class IdentityBlock(Layer):
 
 
 class ProjectionBlock(Layer):
-    def __init__(self, filters, kernel_size, depth=2):
+    def __init__(self, filters, kernel_size, depth=2, strides=2):
         super().__init__()
+        if isinstance(filters, list):
+            assert len(filters) == depth, "Length if filter exceed the layer depth."
+        if isinstance(kernel_size, list):
+            assert len(kernel_size) == depth, "Length if kernel_size exceed the layer depth."
+
         self.depth = depth
-        self.conv2_first = Conv2D(filters, kernel_size, strides=2, padding="same")
-        self.bn_first = BatchNormalization()
-        self.conv2s = [Conv2D(filters, kernel_size, padding="same") for _ in range(depth - 2)]
-        self.bns = [BatchNormalization() for _ in range(depth - 2)]
-        self.conv2_last = Conv2D(filters, kernel_size, padding="same")
-        self.bn_last = BatchNormalization()
-        self.conv2_id = Conv2D(filters, 1, strides=2, padding="same")
+        self.filters = filters if isinstance(filters, list) else [filters for _ in range(depth)]
+        self.kernel_size = kernel_size if isinstance(kernel_size, list) else [kernel_size for _ in range(depth)]
+
+        self.conv2s = [Conv2D(self.filters[i], self.kernel_size[i], strides=strides, padding="same") if i == 0 else
+                       Conv2D(self.filters[i], self.kernel_size[i], padding="same") for i in range(depth)]
+        self.bns = [BatchNormalization() for _ in range(depth)]
+
+        self.conv2_id = Conv2D(self.filters[-1], 1, strides=strides, padding="same")
+        self.bn_id = BatchNormalization()
 
     def call(self, input_tensor, training=False):
-        x = self.conv2_first(input_tensor)
-        x = self.bn_first(x)
-
-        for i in range(self.depth - 2):
+        x = input_tensor
+        for i in range(len(self.conv2s) - 1):
             x = self.conv2s[i](x)
-            x = self.bns[i](x, training=training)
+            x = self.bns[i](x)
             x = tf.nn.relu(x)
 
-        x = self.conv2_last(x)
-        x = self.bn_last(x, training=training)
+        x = self.conv2s[-1](x)
+        x = self.bns[-1](x, training=training)
 
-        x += self.conv2_id(input_tensor)
+        id = self.conv2_id(input_tensor)
+        id = self.bn_id(id)
+
+        x += id
         x = tf.nn.relu(x)
 
         return x
