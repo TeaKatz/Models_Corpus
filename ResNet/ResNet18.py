@@ -1,6 +1,6 @@
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Conv2D, MaxPool2D, AvgPool2D
-from ResLayers import IdentityBlock, ProjectionBlock
+from ResNet.ResLayers import IdentityBlock, ProjectionBlock
 
 
 class ResNet18(Model):
