@@ -20,6 +20,7 @@ class CustomLossFunction:
         loss = tf.reduce_mean(rec_loss + reg_loss)
         return loss
 
-    def __call__(self, y_true, y_pred, z_mean, z_log_var):
+    def __call__(self, y_true, y_pred):
+        y_pred, z_mean, z_log_var = y_pred[0], y_pred[1], y_pred[2]
         loss = self.vae_loss(y_true, y_pred, z_mean, z_log_var)
         return loss

@@ -1,12 +1,13 @@
 import tensorflow as tf
+from XModel import XModel
 from VAEs.layers import Decoder, Encoder, Sampling
 
 
-class VAE(tf.keras.Model):
+class VAE(XModel):
     def __init__(self, shape_before_flattening, latent_dim):
         super().__init__()
         self.encoder = Encoder(latent_dim)
-        self.sampling = Sampling()
+        self.sampling = Sampling(latent_dim)
         self.decoder = Decoder(shape_before_flattening)
 
     def call(self, inp):
