@@ -1,13 +1,12 @@
-from tensorflow.keras import Model
-from tensorflow.keras.layers import Conv2D, MaxPool2D, AvgPool2D
-from ResNet.ResLayers import IdentityBlock, ProjectionBlock
+import tensorflow as tf
+from ResNet.layers import IdentityBlock, ProjectionBlock
 
 
-class ResNet34(Model):
+class ResNet34(tf.keras.Model):
     def __init__(self):
         super().__init__()
-        self.conv2 = Conv2D(64, 7, strides=2, padding="same")
-        self.maxpool = MaxPool2D(3, strides=2, padding="valid")
+        self.conv2 = tf.keras.layers.Conv2D(64, 7, strides=2, padding="same")
+        self.maxpool = tf.keras.layers.MaxPool2D(3, strides=2, padding="valid")
         self.idblk_1 = [IdentityBlock(64, 3) for _ in range(3)]
         self.pjblk_1 = ProjectionBlock(128, 3)
         self.idblk_2 = [IdentityBlock(128, 3) for _ in range(3)]
@@ -15,7 +14,7 @@ class ResNet34(Model):
         self.idblk_3 = [IdentityBlock(256, 3) for _ in range(5)]
         self.pjblk_3 = ProjectionBlock(512, 3)
         self.idblk_4 = [IdentityBlock(512, 3) for _ in range(2)]
-        self.avgpool = AvgPool2D(3, strides=2, padding="valid")
+        self.avgpool = tf.keras.layers.AvgPool2D(3, strides=2, padding="valid")
 
     def call(self, input_tensor, training=False):
         assert input_tensor.shape[1] >= 112 and input_tensor.shape[2] >= 112, \

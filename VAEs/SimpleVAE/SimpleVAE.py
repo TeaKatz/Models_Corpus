@@ -1,9 +1,8 @@
-import tensorflow as tf
-from XModel import XModel
-from VAEs.layers import Decoder, Encoder, Sampling
+from VAEs.utils import CustomModel
+from VAEs.SimpleVAE.layers import Decoder, Encoder, Sampling
 
 
-class VAE(XModel):
+class SimpleVAE(CustomModel):
     def __init__(self, shape_before_flattening, latent_dim):
         super().__init__()
         self.encoder = Encoder(latent_dim)
